@@ -1,0 +1,27 @@
+service: herbs-api-lambda
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: prd
+  region: sa-east-1
+
+useDotenv: true
+
+environment:
+  SQS_URL: ${env:SQS_URL}
+
+functions:
+  apiGateway:
+    name: herbs-api
+    handler: src/infra/serverless/apiHandler.adicionarFila
+    events:
+      - httpApi:
+          path: /adicionarFila
+          method: post

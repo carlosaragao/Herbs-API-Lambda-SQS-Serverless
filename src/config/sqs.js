@@ -1,0 +1,1 @@
+module.exports.filaLambdaApi = Object.freeze({ URL: process.env.SQS_URL })
