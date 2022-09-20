@@ -5,11 +5,7 @@
     "main": "src/index.js",
     "scripts": {
         "start": "node src/index.js",
-        "start:dev": "nodemon src/index.js",
-        "lint": "npx eslint \"**/*.{js,jsx}\" --quiet",
-        "lint:fix": "npx eslint \"**/*.{js,jsx}\" --fix",
-        "test": "npm run spec",
-        "spec": "herbs spec"
+        "start:dev": "nodemon src/index.js"
     },
     "keywords": [
         "herbs"
@@ -21,12 +17,9 @@
         "@herbsjs/herbs": "^1.6.2",
         "@herbsjs/herbs2knex": "^1.5.7",
         "@herbsjs/herbsshelf": "^4.0.1",
-        "deepmerge": "^4.2.2",
+        "aws-sdk": "^2.1220.0",
         "dotenv": "^16.0.1",
-        "lodash.camelcase": "^4.3.0",
-        "mocha": "^10.0.0",
-        "nodemon": "^2.0.19",
-        "pg": "^8.7.3",
+        "graceful-fs": "^4.2.10",
         "serverless-dotenv-plugin": "^4.0.2",
         "sugar-env": "^1.5.14"
     },

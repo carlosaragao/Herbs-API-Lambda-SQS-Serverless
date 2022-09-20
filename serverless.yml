@@ -11,11 +11,16 @@ provider:
   runtime: nodejs16.x
   stage: prd
   region: sa-east-1
+  environment:
+    SQS_URL: ${env:SQS_URL}
+    SQS_QUEUE_NAME: ${env:SQS_QUEUE_NAME}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+      Resource: arn:aws:sqs:${self:provider.region}:*:${env:SQS_QUEUE_NAME}
 
 useDotenv: true
-
-environment:
-  SQS_URL: ${env:SQS_URL}
 
 functions:
   apiGateway:
