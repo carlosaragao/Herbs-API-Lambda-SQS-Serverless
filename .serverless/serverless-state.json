@@ -10,8 +10,8 @@
       "stage": "prd",
       "region": "sa-east-1",
       "environment": {
-        "SQS_URL": "https://sqs.sa-east-1.amazonaws.com/283546918190/fila-api-lamba",
-        "SQS_QUEUE_NAME": "fila-api-lamba"
+        "SQS_URL": "https://sqs.sa-east-1.amazonaws.com/283546918190/fila-api-lambda",
+        "SQS_QUEUE_NAME": "fila-api-lambda"
       },
       "iamRoleStatements": [
         {
@@ -19,7 +19,7 @@
           "Action": [
             "sqs:SendMessage"
           ],
-          "Resource": "arn:aws:sqs:sa-east-1:*:fila-api-lamba"
+          "Resource": "arn:aws:sqs:sa-east-1:*:fila-api-lambda"
         }
       ],
       "versionFunctions": true,
@@ -102,6 +102,12 @@
               "LogGroupName": "/aws/lambda/herbs-api"
             }
           },
+          "SqsFilaLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/herbs-consumer"
+            }
+          },
           "IamRoleLambdaExecution": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -145,6 +151,9 @@
                         "Resource": [
                           {
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/herbs-api:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/herbs-consumer:*"
                           }
                         ]
                       },
@@ -156,11 +165,30 @@
                         "Resource": [
                           {
                             "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/herbs-api:*:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/herbs-consumer:*:*"
                           }
                         ]
                       },
                       {
                         "$ref": "$[\"service\"][\"provider\"][\"iamRoleStatements\"][0]"
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "sqs:ReceiveMessage",
+                          "sqs:DeleteMessage",
+                          "sqs:GetQueueAttributes"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "fila",
+                              "Arn"
+                            ]
+                          }
+                        ]
                       }
                     ]
                   }
@@ -189,7 +217,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/herbs-api-lambda/prd/1663702622898-2022-09-20T19:37:02.898Z/herbs-api-lambda.zip"
+                "S3Key": "serverless/herbs-api-lambda/prd/1663707161501-2022-09-20T20:52:41.501Z/herbs-api-lambda.zip"
               },
               "Handler": "src/infra/serverless/apiHandler.adicionarFila",
               "Runtime": "nodejs16.x",
@@ -198,8 +226,8 @@
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "SQS_URL": "https://sqs.sa-east-1.amazonaws.com/283546918190/fila-api-lamba",
-                  "SQS_QUEUE_NAME": "fila-api-lamba"
+                  "SQS_URL": "https://sqs.sa-east-1.amazonaws.com/283546918190/fila-api-lambda",
+                  "SQS_QUEUE_NAME": "fila-api-lambda"
                 }
               },
               "Role": {
@@ -213,14 +241,77 @@
               "ApiGatewayLogGroup"
             ]
           },
-          "ApiGatewayLambdaVersion0mdHHqraevf6QiRlCfIWbF8dKaouPBvOa7zrgWe9Pw": {
+          "SqsFilaLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": {
+                  "Ref": "ServerlessDeploymentBucket"
+                },
+                "S3Key": "serverless/herbs-api-lambda/prd/1663707161501-2022-09-20T20:52:41.501Z/herbs-api-lambda.zip"
+              },
+              "Handler": "src/infra/serverless/consumerHandler.observarFila",
+              "Runtime": "nodejs16.x",
+              "FunctionName": "herbs-consumer",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "SQS_URL": "https://sqs.sa-east-1.amazonaws.com/283546918190/fila-api-lambda",
+                  "SQS_QUEUE_NAME": "fila-api-lambda"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "SqsFilaLogGroup"
+            ]
+          },
+          "ApiGatewayLambdaVersionHZ4H57aoCMqNT8ET9M0Lz25nFI7qwQSi2hBadef1q8": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ApiGatewayLambdaFunction"
               },
-              "CodeSha256": "zbQYdNO9xsty+nhRHWpsHCTSIF/G54H1ck67/MNMeHE="
+              "CodeSha256": "KPlukwr0TbLJ6Fs9Od7B4/mAMEio2DtLx9af3j4Ekig="
+            }
+          },
+          "SqsFilaLambdaVersionvKaTJq9gRasQl3IqZPd9LVzX3qZ98yVp2bXVjdpShM": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "SqsFilaLambdaFunction"
+              },
+              "CodeSha256": "KPlukwr0TbLJ6Fs9Od7B4/mAMEio2DtLx9af3j4Ekig="
+            }
+          },
+          "SqsFilaEventSourceMappingSQSFila": {
+            "Type": "AWS::Lambda::EventSourceMapping",
+            "DependsOn": [
+              "IamRoleLambdaExecution"
+            ],
+            "Properties": {
+              "BatchSize": 1,
+              "EventSourceArn": {
+                "Fn::GetAtt": [
+                  "fila",
+                  "Arn"
+                ]
+              },
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "SqsFilaLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Enabled": true
             }
           },
           "HttpApi": {
@@ -313,6 +404,12 @@
               }
             },
             "DependsOn": "HttpApiIntegrationApiGateway"
+          },
+          "fila": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "QueueName": "fila-api-lambda"
+            }
           }
         },
         "Outputs": {
@@ -327,10 +424,19 @@
           "ApiGatewayLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ApiGatewayLambdaVersion0mdHHqraevf6QiRlCfIWbF8dKaouPBvOa7zrgWe9Pw"
+              "Ref": "ApiGatewayLambdaVersionHZ4H57aoCMqNT8ET9M0Lz25nFI7qwQSi2hBadef1q8"
             },
             "Export": {
               "Name": "sls-herbs-api-lambda-prd-ApiGatewayLambdaFunctionQualifiedArn"
+            }
+          },
+          "SqsFilaLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "SqsFilaLambdaVersionvKaTJq9gRasQl3IqZPd9LVzX3qZ98yVp2bXVjdpShM"
+            },
+            "Export": {
+              "Name": "sls-herbs-api-lambda-prd-SqsFilaLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -477,8 +583,39 @@
         "timeout": 6,
         "runtime": "nodejs16.x",
         "vpc": {},
-        "versionLogicalId": "ApiGatewayLambdaVersion0mdHHqraevf6QiRlCfIWbF8dKaouPBvOa7zrgWe9Pw"
+        "versionLogicalId": "ApiGatewayLambdaVersionHZ4H57aoCMqNT8ET9M0Lz25nFI7qwQSi2hBadef1q8"
+      },
+      "sqsFila": {
+        "name": "herbs-consumer",
+        "handler": "src/infra/serverless/consumerHandler.observarFila",
+        "events": [
+          {
+            "sqs": {
+              "arn": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"IamRoleLambdaExecution\"][\"Properties\"][\"Policies\"][0][\"PolicyDocument\"][\"Statement\"][3][\"Resource\"][0]"
+              },
+              "batchSize": 1
+            }
+          }
+        ],
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs16.x",
+        "vpc": {},
+        "versionLogicalId": "SqsFilaLambdaVersionvKaTJq9gRasQl3IqZPd9LVzX3qZ98yVp2bXVjdpShM"
       }
+    },
+    "resources": {
+      "Resources": {
+        "fila": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "QueueName": "fila-api-lambda"
+          }
+        }
+      },
+      "Outputs": {}
     },
     "configValidationMode": "warn",
     "serviceFilename": "serverless.yml",
@@ -494,6 +631,9 @@
       "useDotenv": true,
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
       }
     },
     "layers": {},
@@ -501,7 +641,7 @@
     "artifact": "D:\\Estudos\\AWS\\NodeJs\\herbs-api-lambda\\.serverless\\herbs-api-lambda.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/herbs-api-lambda/prd/1663702622898-2022-09-20T19:37:02.898Z",
+    "artifactDirectoryName": "serverless/herbs-api-lambda/prd/1663707161501-2022-09-20T20:52:41.501Z",
     "artifact": "herbs-api-lambda.zip"
   }
 }

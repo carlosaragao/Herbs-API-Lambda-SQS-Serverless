@@ -30,3 +30,20 @@ functions:
       - httpApi:
           path: /adicionarFila
           method: post
+  sqsFila:
+    name: herbs-consumer
+    handler: src/infra/serverless/consumerHandler.observarFila
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - fila
+              - Arn
+          batchSize: 1
+
+resources:
+  Resources:
+    fila:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${env:SQS_QUEUE_NAME}
