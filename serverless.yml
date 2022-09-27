@@ -12,7 +12,7 @@ provider:
   stage: prd
   region: sa-east-1
   environment:
-    SQS_URL: ${env:SQS_URL}
+    SQS_URL: https://sqs.${self:provider.region}.amazonaws.com/${env:SQS_ACCOUNT_ID}/${env:SQS_QUEUE_NAME}
     SQS_QUEUE_NAME: ${env:SQS_QUEUE_NAME}
   iamRoleStatements:
     - Effect: Allow
