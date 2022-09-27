@@ -39,17 +39,6 @@ It should be a list of top 3 or 5 features or use cases.
 
 ❌ - REST and GraphQL APIs
 
-❌ - Handles 1000 transactions/second
-
-## Using
-
-To start the project for the first time:
-
-```
-$ npm install
-$ npm run knex:migrate 
-$ npm start
-```
 
 # Technical Requirements
 
