@@ -1,8 +1,5 @@
-
-const observarFila = (event, context, callback) => {
-  console.log(`PEGOU O EVENTO - ${JSON.stringify(event)}`)
-  context.done(null, '')
+module.exports = async (event, context) => {
+  for (const { body } of event.Records) {
+    console.log(JSON.parse(body))
+  }
 }
-
-module.exports = observarFila
-module.exports.observarFila = observarFila

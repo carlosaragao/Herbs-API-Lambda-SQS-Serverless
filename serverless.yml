@@ -1,38 +1,40 @@
 service: herbs-api-lambda
 
-frameworkVersion: '3'
-
 plugins:
   - serverless-offline
+  - serverless-offline-sqs
   - serverless-dotenv-plugin
+
+useDotenv: true
+configValidationMode: error
 
 provider:
   name: aws
   runtime: nodejs16.x
-  stage: prd
   region: sa-east-1
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+          Resource: arn:aws:sqs:${self:provider.region}:*:${env:SQS_QUEUE_NAME}
   environment:
-    SQS_URL: https://sqs.${self:provider.region}.amazonaws.com/${env:SQS_ACCOUNT_ID}/${env:SQS_QUEUE_NAME}
+    NODE_ENV: ${env:NODE_ENV}
+    SQS_URL: ${env:SQS_ACCOUNT_URL_ID}/${env:SQS_QUEUE_NAME}
     SQS_QUEUE_NAME: ${env:SQS_QUEUE_NAME}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - sqs:SendMessage
-      Resource: arn:aws:sqs:${self:provider.region}:*:${env:SQS_QUEUE_NAME}
-
-useDotenv: true
 
 functions:
   apiGateway:
     name: herbs-api
-    handler: src/infra/serverless/apiHandler.adicionarFila
+    handler: index.apiHandler
     events:
-      - httpApi:
-          path: /adicionarFila
+      - http:
+          path: adicionarFila
           method: post
   sqsFila:
     name: herbs-consumer
-    handler: src/infra/serverless/consumerHandler.observarFila
+    handler: index.consumerHandler
     events:
       - sqs:
           arn:
@@ -46,4 +48,14 @@ resources:
     fila:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${env:SQS_QUEUE_NAME}
+        QueueName: fila-api-lambda
+
+custom:
+  serverless-offline-sqs:
+    autoCreate: true
+    apiVersion: '2012-11-05'
+    endpoint: http://0.0.0.0:9324
+    region: sa-east-1
+    accessKeyId: root
+    secretAccessKey: root
+    skipCacheInvalidation: false

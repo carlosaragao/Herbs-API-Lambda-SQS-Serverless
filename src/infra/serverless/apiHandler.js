@@ -5,7 +5,7 @@ const dependencies = {
   fila: config.sqs.filaLambdaApi
 }
 
-const adicionarFila = async (event) => {
+module.exports = async (event) => {
 
   try {
     const params = {
@@ -33,6 +33,3 @@ const adicionarFila = async (event) => {
     }
   }
 };
-
-module.exports = adicionarFila
-module.exports.adicionarFila = adicionarFila

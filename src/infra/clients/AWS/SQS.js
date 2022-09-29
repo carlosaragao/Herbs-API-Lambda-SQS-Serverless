@@ -1,7 +1,7 @@
 const { Err, Ok } = require('@herbsjs/herbs')
 
 const dependencies = {
-  SQS: require("aws-sdk").SQS,
+  SQS: require("aws-sdk").SQS
 };
 
 class AwsSQSClient {
@@ -23,4 +23,4 @@ class AwsSQSClient {
   }
 }
 
-module.exports = AwsSQSClient;
+module.exports = AwsSQSClient
